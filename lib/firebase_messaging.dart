@@ -6,8 +6,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
 
+// アプリ停止中に通知が来た場合の処理
+// トップレベル関数で定義する必要がある
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // FirebaseNotificationListenerの状態に依存出来ないためここで初期化
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -23,6 +26,7 @@ class FirebaseNotificationListener {
 
   FirebaseNotificationListener();
 
+  // 必要なフィールドの初期化
   init() async {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -37,16 +41,20 @@ class FirebaseNotificationListener {
   }
 
   listen() {
-    FirebaseMessaging.onMessage.listen(_listenOnMessageNotification);
-    FirebaseMessaging.onMessageOpenedApp.listen(_listenNotification);
+    // アプリ起動中の通知監視
+    FirebaseMessaging.onMessage.listen(_handleOnMessageNotification);
+    // アプリが裏画面で起動している状態の通知監視 裏画面からの復帰時に処理される
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleOnMessageOpenedNotification);
+    // アプリ停止中の通知監視
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
+  // androidのローカル通知に利用するチャンネルの初期化
   _initializeNotificationChannel() async {
     channel = const AndroidNotificationChannel(
       'default_notification_channel',
       channalName,
-      importance: Importance.max,
+      importance: Importance.max, // 優先度を最大に設定
     );
 
     await flutterLocalNotificationsPlugin
@@ -58,6 +66,7 @@ class FirebaseNotificationListener {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+  // androidのローカル通知送信
   _showLocalNotification(RemoteNotification notification, AndroidNotification android) {
     flutterLocalNotificationsPlugin.show(
       notification.hashCode,
@@ -72,9 +81,8 @@ class FirebaseNotificationListener {
     );
   }
 
-  _listenOnMessageNotification(RemoteMessage message) {
-    // フォアグラウンド起動中に通知が来た場合、
-    // Androidは通知が表示されないため、ローカル通知として表示する
+  _handleOnMessageNotification(RemoteMessage message) {
+    // フォアグラウンド起動中に通知が来た場合、Androidは通知が表示されないため、ローカル通知として表示する
     if (Platform.isAndroid) {
       final notification = message.notification;
       final android = message.notification?.android;
@@ -84,7 +92,7 @@ class FirebaseNotificationListener {
     }
   }
 
-  _listenNotification(RemoteMessage message) {
+  _handleOnMessageOpenedNotification(RemoteMessage message) {
     debugPrint('Got a message whilst in the foreground!');
     debugPrint('Message data: ${message.data}');
 
