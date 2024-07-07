@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart';
+import 'firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  final messagingInstance = FirebaseMessaging.instance;
-  messagingInstance.requestPermission();
-
-  final token = await messagingInstance.getToken();
-  debugPrint('firebase messaging token: $token');
+  FirebaseNotificationListener listener = FirebaseNotificationListener();
+  listener.init();
+  listener.listen();
 
   runApp(const MyApp());
 }
