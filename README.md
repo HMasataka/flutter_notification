@@ -4,13 +4,14 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+```bash
+firebase login
+```
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+dart pub global activate flutterfire_cli
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutterfire configure --platforms=android --project=oshi-connect-dev --android-package-name=com.caravan_inc.oshiconnect_app
+```
